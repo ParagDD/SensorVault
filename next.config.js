@@ -10,9 +10,9 @@ const nextConfig = {
         
         return [
             {
-                // This should route to the backend directly without duplicating paths
-                source: '/api/:path*',
-                destination: `${apiUrl}/api/:path*`,
+                // Rewrite all /api/v1/ requests to the backend
+                source: '/api/v1/:path*',
+                destination: `${apiUrl}/api/v1/:path*`,
             },
         ];
     },
