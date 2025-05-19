@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://ed5f-106-213-83-26.ngrok-free.app",
+    "NEXT_PUBLIC_ENV": "production",
+    "NEXT_PUBLIC_JWT_EXPIRES_IN": "30"
+  }
+} 
