@@ -30,33 +30,74 @@ export default function SensorDropdown() {
   // Fetch available tables when component mounts or token changes
   useEffect(() => {
     const fetchTables = async () => {
+      console.log("SensorDropdown useEffect: fetching tables..."); // Added log
       if (!token) {
+        console.log("SensorDropdown useEffect: No token, stopping fetch."); // Added log
         setIsLoading(false); // Stop loading if no token
         return; // Don't fetch if no token
       }
 
       setIsLoading(true);
       setError(null);
+      const tablesApiUrl = `${API_URL}/api/v1/data/tables`;
+      console.log("SensorDropdown useEffect: Fetching from URL:", tablesApiUrl); // Added log
+
       try {
-        // Use direct API URL
-        const response = await fetch(`${API_URL}/api/v1/data/tables`, {
+        const response = await fetch(tablesApiUrl, {
           headers: {
             'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json' // Added content type header
           },
         });
 
-        if (!response.ok) {
+        console.log("SensorDropdown useEffect: Fetch response status:", response.status); // Added log
+        console.log("SensorDropdown useEffect: Fetch response headers:", response.headers); // Added log
+
+        // Check if the response is OK, but also check content type before parsing as JSON
+        const contentType = response.headers.get("content-type");
+        if (!response.ok || (contentType && !contentType.includes("application/json"))) {
              let errorDetail = `Error fetching tables: ${response.status} ${response.statusText}`;
-              try {
-                  const errorData = await response.json();
-                  errorDetail = errorData.detail || errorDetail;
-              } catch (jsonError) {
-                   console.error("Failed to parse error response as JSON:", jsonError);
-              }
-           throw new Error(errorDetail);
+             let responseText = "Could not read response body";
+
+             try {
+                 // Attempt to read body as text for better error message
+                 responseText = await response.text();
+                 console.error("SensorDropdown useEffect: Received non-JSON or error response body:", responseText); // Added log
+                 
+                 // If it's an HTML response, try to extract a title or message
+                 if (responseText.startsWith("<!DOCTYPE html>")) {
+                     const parser = new DOMParser();
+                     const htmlDoc = parser.parseFromString(responseText, 'text/html');
+                     const titleElement = htmlDoc.querySelector('title');
+                     errorDetail = titleElement ? `Error: ${titleElement.textContent}` : `Error: Received unexpected HTML response (Status: ${response.status})`;
+                 } else {
+                      // If not HTML, maybe it's a backend error JSON we couldn't parse earlier
+                      try {
+                         const errorData = JSON.parse(responseText);
+                         errorDetail = errorData.detail || JSON.stringify(errorData);
+                      } catch (jsonError) {
+                          // Still couldn't parse as JSON
+                           errorDetail = `Error: Received unexpected response format (Status: ${response.status})`;
+                           console.error("SensorDropdown useEffect: Failed to parse non-JSON response as JSON:", jsonError); // Added log
+                      }
+                 }
+
+             } catch (readError) {
+                 console.error("SensorDropdown useEffect: Failed to read response body:", readError); // Added log
+             }
+
+             // If the response was not OK, throw an error with status and potentially more detail
+             if (!response.ok) {
+                  throw new Error(errorDetail);
+             } else {
+                  // If response was OK but not JSON (e.g., HTML 200), still an error for us
+                   throw new Error(errorDetail);
+             }
         }
 
-        const data = await response.json();
+        const data = await response.json(); // This is where the SyntaxError happens if response is not JSON
+        console.log("SensorDropdown useEffect: Received data:", data); // Added log
+
         setAvailableTables(data.tables || []);
 
         // Optionally set a default selected table if available
@@ -67,7 +108,7 @@ export default function SensorDropdown() {
         }
 
       } catch (err: any) {
-        console.error("Error fetching tables:", err);
+        console.error("SensorDropdown useEffect: Fetch error caught:", err); // Added log
         setError(err.message || "An error occurred while fetching tables.");
          toast({
           title: "Error Fetching Tables",
@@ -76,11 +117,15 @@ export default function SensorDropdown() {
         });
       } finally {
         setIsLoading(false);
+         console.log("SensorDropdown useEffect: Fetch process finished."); // Added log
       }
     };
 
     if (token) { // Fetch tables only if token is available
       fetchTables();
+    } else {
+       console.log("SensorDropdown useEffect: Token not available yet, not fetching tables."); // Added log
+       setIsLoading(false);
     }
   }, [token]); // Depend on token
 
@@ -94,7 +139,7 @@ export default function SensorDropdown() {
   }
 
   if (error) {
-    return <div className="text-center text-red-600">Error loading tables.</div>; // Error state
+    return <div className="text-center text-red-600">{error}</div>; // Display specific error
   }
 
   if (availableTables.length === 0) {
