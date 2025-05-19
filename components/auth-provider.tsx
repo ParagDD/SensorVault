@@ -96,6 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token, isLoading, pathname, router, isClient]) // Depend on token state and isClient
 
   const login = async (phoneNumber: string, password: string) => {
+    debugger;
     setIsLoading(true);
     // Add error state to context
     const [error, setError] = useState<string | null>(null);
