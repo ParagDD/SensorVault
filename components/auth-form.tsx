@@ -36,7 +36,6 @@ export default function AuthForm() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("onSubmit function called with values:", values)
     try {
       // In a real app, this would call an API endpoint
       await login(values.phoneNumber, values.password)
