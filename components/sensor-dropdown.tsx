@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from '@/hooks/use-auth'; // Import useAuth hook
 import { useToast } from '@/components/ui/use-toast'; // Import useToast hook
 
-// Use direct API URL instead of relying on the Next.js proxy
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+// Remove the API_URL constant
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 // Remove mock data
 // const sensorTables = [
@@ -38,8 +38,8 @@ export default function SensorDropdown() {
       setIsLoading(true);
       setError(null);
       try {
-        // Use direct API URL
-        const response = await fetch(`${API_URL}/api/v1/data/tables`, {
+        // Use relative API path
+        const response = await fetch('/api/v1/data/tables', {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

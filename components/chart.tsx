@@ -104,7 +104,7 @@ export default function SensorChart({ tableName }: SensorChartProps) {
               strokeWidth={2} 
               dot={false}
               activeDot={{ r: 6, fill: "#0ea5e9" }} 
-            />
+              />
           </LineChart>
         </ResponsiveContainer>
       ) : (

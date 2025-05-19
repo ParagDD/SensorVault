@@ -20,8 +20,8 @@ type AuthContextType = {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Use direct API URL instead of relying on the Next.js proxy
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+// Remove the API_URL constant
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -97,11 +97,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (phoneNumber: string, password: string) => {
     setIsLoading(true);
+    // Add error state to context
+    const [error, setError] = useState<string | null>(null);
+
     setError(null); // Clear any previous errors
     console.log("Attempting login for", phoneNumber); // Added log
     try {
-      // Use direct API URL instead of the rewritten path
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+      // Use relative API path
+      const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -199,10 +202,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>{children}</AuthContext.Provider> // Provide token in context
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
-}
+// Export useAuth separately if needed elsewhere (already done above)
+// export function useAuth() {
+//   const context = useContext(AuthContext)
+//   if (context === undefined) {
+//     throw new Error("useAuth must be used within an AuthProvider")
+//   }
+//   return context
+// }
